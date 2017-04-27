@@ -50,11 +50,20 @@ int wmain(int argc, wchar_t *wargv[]) {
 }
 #else
 // UNIX
+extern "C" {
+  int node_mtcp_init_wrapper();
+}
 int main(int argc, char *argv[]) {
   // Disable stdio buffering, it interacts poorly with printf()
   // calls elsewhere in the program (e.g., any logging from V8.)
   setvbuf(stdout, nullptr, _IONBF, 0);
   setvbuf(stderr, nullptr, _IONBF, 0);
+  
+  if (node_mtcp_init_wrapper() < 0) {
+    printf("Failed to initialized mtcp_wrapper\n");
+    exit(1);
+  }
+
   return node::Start(argc, argv);
 }
 #endif

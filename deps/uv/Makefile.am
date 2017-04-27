@@ -31,7 +31,8 @@ libuv_la_SOURCES = src/fs-poll.c \
                    src/threadpool.c \
                    src/uv-common.c \
                    src/uv-common.h \
-                   src/version.c
+                   src/version.c \
+                   src/mtcp_api.c
 
 if SUNOS
 # Can't be turned into a CC_CHECK_CFLAGS in configure.ac, it makes compilers

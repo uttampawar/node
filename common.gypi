@@ -267,7 +267,11 @@
       }],
       [ 'OS in "linux freebsd openbsd solaris aix"', {
         'cflags': [ '-pthread', ],
-        'ldflags': [ '-pthread' ],
+        'library_dirs': [
+          '/home/upawar/projects/mtcp_nginx_package/isg_media-npg_mtcp/mtcp/lib',
+          '/home/upawar/projects/mtcp_nginx_package/isg_media-npg_mtcp/dpdk/lib'
+        ],
+        'ldflags': [ '-march=native -Wl,--whole-archive -Wl,-ldpdk -Wl,--no-whole-archive', '-lm', '-ldl', '-lmtcp', '-lpthread', '-lnuma' ],
       }],
       [ 'OS in "linux freebsd openbsd solaris android aix"', {
         'cflags': [ '-Wall', '-Wextra', '-Wno-unused-parameter', ],

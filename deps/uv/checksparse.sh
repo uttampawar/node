@@ -53,6 +53,7 @@ src/unix/tty.c
 src/unix/udp.c
 src/uv-common.c
 src/uv-common.h
+src/unix/mtcp_api.c
 "
 
 TESTS="

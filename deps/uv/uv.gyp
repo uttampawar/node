@@ -7,6 +7,9 @@
           '_FILE_OFFSET_BITS=64',
         ],
         'conditions': [
+          ['OS=="linux"', {
+            'cflags': [ '-O3 -march=native -DRTE_MACHINE_CPUFLAG_SSE -DRTE_MACHINE_CPUFLAG_SSE2 -DRTE_MACHINE_CPUFLAG_SSE3 -DRTE_MACHINE_CPUFLAG_SSSE3 -DRTE_MACHINE_CPUFLAG_SSE4_1 -DRTE_MACHINE_CPUFLAG_SSE4_2 -DRTE_MACHINE_CPUFLAG_AES -DRTE_MACHINE_CPUFLAG_PCLMULQDQ -DRTE_MACHINE_CPUFLAG_AVX -DRTE_COMPILE_TIME_CPUFLAGS=RTE_CPUFLAG_SSE,RTE_CPUFLAG_SSE2,RTE_CPUFLAG_SSE3,RTE_CPUFLAG_SSSE3,RTE_CPUFLAG_SSE4_1,RTE_CPUFLAG_SSE4_2,RTE_CPUFLAG_AES,RTE_CPUFLAG_PCLMULQDQ,RTE_CPUFLAG_AVX -include /home/upawar/projects/mtcp_nginx_package/isg_media-npg_mtcp/dpdk/include/rte_config.h -I /home/upawar/projects/mtcp_nginx_package/isg_media-npg_mtcp/dpdk/include -I /home/upawar/projects/mtcp_nginx_package/isg_media-npg_mtcp/mtcp/include -pthread'],
+         }],
           ['OS=="solaris"', {
             'cflags': [ '-pthreads' ],
           }],
@@ -78,7 +81,8 @@
         'src/threadpool.c',
         'src/uv-common.c',
         'src/uv-common.h',
-        'src/version.c'
+        'src/version.c',
+        'src/mtcp_api.c',
       ],
       'conditions': [
         [ 'OS=="win"', {
