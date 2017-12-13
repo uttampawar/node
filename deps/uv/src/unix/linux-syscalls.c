@@ -25,6 +25,8 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <sys/eventfd.h>
+#include <fcntl.h>
 
 #if defined(__has_feature)
 # if __has_feature(memory_sanitizer)
@@ -210,7 +212,11 @@ int uv__accept4(int fd, struct sockaddr* addr, socklen_t* addrlen, int flags) {
 
   return r;
 #elif defined(__NR_accept4)
+#if defined(AVOID_SYSCALL_API)
+  return accept4(fd, addr, addrlen, flags);
+#else
   return syscall(__NR_accept4, fd, addr, addrlen, flags);
+#endif
 #else
   return errno = ENOSYS, -1;
 #endif
@@ -219,7 +225,11 @@ int uv__accept4(int fd, struct sockaddr* addr, socklen_t* addrlen, int flags) {
 
 int uv__eventfd(unsigned int count) {
 #if defined(__NR_eventfd)
+#if defined(AVOID_SYSCALL_API)
+  return eventfd(count, EFD_CLOEXEC | EFD_NONBLOCK);
+#else
   return syscall(__NR_eventfd, count);
+#endif
 #else
   return errno = ENOSYS, -1;
 #endif
@@ -228,7 +238,11 @@ int uv__eventfd(unsigned int count) {
 
 int uv__eventfd2(unsigned int count, int flags) {
 #if defined(__NR_eventfd2)
+#if defined(AVOID_SYSCALL_API)
+  return eventfd(count, flags);
+#else
   return syscall(__NR_eventfd2, count, flags);
+#endif
 #else
   return errno = ENOSYS, -1;
 #endif
@@ -318,7 +332,6 @@ ssize_t uv__preadv(int fd, const struct iovec *iov, int iovcnt, int64_t offset) 
   return errno = ENOSYS, -1;
 #endif
 }
-
 
 ssize_t uv__pwritev(int fd, const struct iovec *iov, int iovcnt, int64_t offset) {
 #if defined(__NR_pwritev)

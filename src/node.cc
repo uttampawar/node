@@ -2020,6 +2020,12 @@ void SetupProcessObject(Environment* env,
 
 #undef READONLY_PROPERTY
 
+#ifdef MTCP
+extern "C" {
+  void HandleSignal(int signo);
+  int mtcp_app_init();
+}
+#endif
 
 void SignalExit(int signo) {
   uv_tty_reset_mode();
@@ -2029,6 +2035,9 @@ void SignalExit(int signo) {
   memset(&sa, 0, sizeof(sa));
   sa.sa_handler = SIG_DFL;
   CHECK_EQ(sigaction(signo, &sa, nullptr), 0);
+#endif
+#ifdef MTCP
+  HandleSignal(signo);
 #endif
   raise(signo);
 }
