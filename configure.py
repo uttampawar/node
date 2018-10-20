@@ -62,6 +62,8 @@ intl_optgroup = optparse.OptionGroup(parser, "Internationalization",
     "library you want to build against.")
 http2_optgroup = optparse.OptionGroup(parser, "HTTP2",
     "Flags that allows you to control HTTP2 features in Node.js")
+mtcp_optgroup = optparse.OptionGroup(parser, "DPDK",
+"Flags that allows you to enable DPDK or netmap and mTCP stack in Node.js")
 
 # Options should be in alphabetical order but keep --prefix at the top,
 # that's arguably the one people will be looking for most.
@@ -555,6 +557,20 @@ parser.add_option('--build-v8-with-gn',
     dest='build_v8_with_gn',
     default=False,
     help='build V8 using GN instead of gyp')
+
+mtcp_optgroup.add_option('--with-mtcp-path',
+    action='store',
+    dest='mtcp_install_dir',
+    help='build with mtcp support ' +
+         '(This mode is not officially supported for regular applications)')
+
+mtcp_optgroup.add_option('--with-dpdk-path',
+    action='store',
+    dest='dpdk_install_dir',
+    help='build with dpdk support ' +
+         '(This mode is not officially supported for regular applications)')
+
+parser.add_option_group(mtcp_optgroup)
 
 parser.add_option('--verbose',
     action='store_true',
@@ -1505,6 +1521,28 @@ def configure_inspector(o):
                        options.without_ssl)
   o['variables']['v8_enable_inspector'] = 0 if disable_inspector else 1
 
+def configure_mtcp(o):
+  if options.mtcp_install_dir and flavor != 'linux':
+    raise Exception(
+      'MTCP and DPDK is supported only on Linux Systems.')
+  if options.mtcp_install_dir:
+    o['variables']['mtcp_include_path'] = options.mtcp_install_dir + "/include"
+    o['variables']['mtcp_library_path'] = options.mtcp_install_dir + "/lib"
+    o['cflags'] += [" -O3 -DMTCP -DAVOID_SYSCALL_API -I " + o['variables']['mtcp_include_path'] ]
+  if options.dpdk_install_dir:
+    o['variables']['dpdk_include_path'] = options.dpdk_install_dir + "/include"
+    o['variables']['dpdk_library_path'] = options.dpdk_install_dir + "/lib"
+    o['cflags'] += [" -O3 -I " + o['variables']['dpdk_include_path'] ]
+  if options.mtcp_install_dir and options.dpdk_install_dir:
+    o['ldflags'] += ["-L" + o['variables']['dpdk_library_path'] + " " + \
+                     "-L" + o['variables']['mtcp_library_path'] + " " + \
+                     " -march=native -Wl,--whole-archive -Wl,-ldpdk -lmtcp -Wl,--no-whole-archive" + " " + \
+                     " -ldl -lpthread -lnuma -lgmp"]
+  else:
+    if options.mtcp_install_dir:
+      o['ldflags'] += [" -L" + o['variables']['mtcp_library_path'] + " " + \
+                       " -march=native -Wl,--whole-archive -Wl,-lmtcp -Wl,--no-whole-archive" + " " + \
+                       " -ldl -lpthread -lnuma -lgmp"]
 
 def make_bin_override():
   if sys.platform == 'win32':
@@ -1545,6 +1583,7 @@ output = {
   'libraries': [],
   'defines': [],
   'cflags': [],
+  'ldflags': [],
 }
 
 # Print a warning when the compiler is too old.
@@ -1571,6 +1610,7 @@ configure_openssl(output)
 configure_intl(output)
 configure_static(output)
 configure_inspector(output)
+configure_mtcp(output)
 
 # variables should be a root level element,
 # move everything else to target_defaults

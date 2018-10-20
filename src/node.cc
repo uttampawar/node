@@ -2980,6 +2980,13 @@ int Start(int argc, char** argv) {
   }
 #endif
 
+#if MTCP
+  if (mtcp_app_init() < 0) {
+    printf("Failed to initialized mtcp_wrapper\n");
+    exit(1);
+  }
+#endif
+
   // Hack around with the argv pointer. Used for process.title = "blah".
   argv = uv_setup_args(argc, argv);
 
